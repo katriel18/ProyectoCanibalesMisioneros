@@ -2,7 +2,7 @@ package osti.katriel;
 public class App {
     public static void main(String[] args) {
 
-        int[] a = { 3, 0, 0 };
+        int[] a = { 0, 2, 1 };
 
         CanibalesYMisioneros newEstado = new CanibalesYMisioneros(a);
         

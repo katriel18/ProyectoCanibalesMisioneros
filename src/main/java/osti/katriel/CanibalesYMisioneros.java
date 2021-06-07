@@ -18,7 +18,10 @@ public class CanibalesYMisioneros implements Estado {
     }
 
     private boolean esValido(int[] nuevoEstado) {
-        if (nuevoEstado[0] == 0 || TAM - nuevoEstado[0] == 0) {
+        if (nuevoEstado[0] > 3 || nuevoEstado[1] <0 || nuevoEstado[1] > 3 || nuevoEstado[1] < 0) {
+            return false;
+        }
+        if (nuevoEstado[0] == 0 || TAM-nuevoEstado[0] == 0) {
             return true;
         }
         if (nuevoEstado[0] >= nuevoEstado[1] && TAM - nuevoEstado[0] >= TAM - nuevoEstado[1]) {
@@ -36,17 +39,16 @@ public class CanibalesYMisioneros implements Estado {
     }
 
     private void intercambiarYGuardar(int m, int c, ArrayList<Estado> suc) {
+        
         int[] copiaMod = copiarEstadoActual(estadoActual);
 
         copiaMod[0] += copiaMod[2] == 1 ? -m : +m;
         copiaMod[1] += copiaMod[2] == 1 ? -c : +c;
         copiaMod[2] = copiaMod[2] == 1 ? 0 : 1;
 
-        // copiaMod[0]=copiaMod[0]-m;
-        // copiaMod[1]=copiaMod[1]-c;
-        // copiaMod[2] = 0;
         if (esValido(copiaMod))
             suc.add((new CanibalesYMisioneros(copiaMod)));
+
     }
 
     @Override
