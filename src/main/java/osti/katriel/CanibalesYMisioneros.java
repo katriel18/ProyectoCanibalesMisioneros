@@ -5,111 +5,79 @@ import java.util.Arrays;
 
 public class CanibalesYMisioneros implements Estado {
 
-    private final int CANIBALES = 3;
-    private final int MISIONEROS = 3;
+    private final int TAM = 3;
     private final int[] META = { 0, 0, 0 };
-    private int[] boteActual;
+    private int[] estadoActual;
 
-    public CanibalesYMisioneros(int[] bote) {
-        this.boteActual = bote;
+    public CanibalesYMisioneros(int[] nuevoEstado) {
+        this.estadoActual = nuevoEstado;
     }
 
-    private int[] getBoteActual() {
-        return boteActual;
+    public int[] getEstadoActual() {
+        return estadoActual;
     }
 
-    private int[] getBoteComplemento() {
-        int[] boteComplemento = new int[3];
-        boteComplemento[0] = MISIONEROS - boteActual[0];
-        boteComplemento[1] = CANIBALES - boteActual[1];
-        boteComplemento[2] = boteActual[2] == 0 ? 1 : 0;
-        return boteComplemento;
-    }
-
-    @Override
-    public boolean esMeta() {
-        if (Arrays.equals(boteActual, META)) {
+    private boolean esValido(int[] nuevoEstado) {
+        if (nuevoEstado[0] == 0 || TAM - nuevoEstado[0] == 0) {
+            return true;
+        }
+        if (nuevoEstado[0] >= nuevoEstado[1] && TAM - nuevoEstado[0] >= TAM - nuevoEstado[1]) {
             return true;
         }
         return false;
     }
 
-    private void transportarYGuardar(int m, int c, ArrayList<Estado> suc) {
-        int[] boteCopia = copiarBote(boteActual);
-        boteCopia[0] += m;
-        boteCopia[1] += c;
-        boteCopia[2] = boteCopia[2] == 0 ? 1 : 0;
-        suc.add(new CanibalesYMisioneros(boteCopia));
+    @Override
+    public boolean esMeta() {
+        if (Arrays.equals(estadoActual, META)) {
+            return true;
+        }
+        return false;
+    }
+
+    private void intercambiarYGuardar(int m, int c, ArrayList<Estado> suc) {
+        int[] copiaMod = copiarEstadoActual(estadoActual);
+
+        copiaMod[0] += copiaMod[2] == 1 ? -m : +m;
+        copiaMod[1] += copiaMod[2] == 1 ? -c : +c;
+        copiaMod[2] = copiaMod[2] == 1 ? 0 : 1;
+
+        // copiaMod[0]=copiaMod[0]-m;
+        // copiaMod[1]=copiaMod[1]-c;
+        // copiaMod[2] = 0;
+        if (esValido(copiaMod))
+            suc.add((new CanibalesYMisioneros(copiaMod)));
     }
 
     @Override
     public ArrayList<Estado> generarSucesores() {
+
         ArrayList<Estado> sucesores = new ArrayList<>();
 
-        int[] complemento = getBoteComplemento();
-
         // Operadores:
-        // Oeste
-        if (boteActual[2] == 1) {
-            // 1) 1 misionero cruza en el bote
-            if (boteActual[0] >= 1 && complemento[0] + 1 >= complemento[1]
-                    && (boteActual[0] - 1 >= boteActual[1] || boteActual[0] == 1)) {
-                transportarYGuardar(-1, 0, sucesores);
-            }
-            // 2) 2 misioneros cruzan en el bote
-            if (boteActual[0] >= 2 && (boteActual[0] - 2 >= boteActual[1] || boteActual[0] == 2)
-                    && complemento[0] + 2 >= complemento[1]) {
-                transportarYGuardar(-2, 0, sucesores);
-            }
-            // 3) 1 canibal cruza en el bote
-            if (boteActual[1] >= 1 && complemento[1] + 1 <= complemento[0] || complemento[0] == 0) {
-                transportarYGuardar(0, -1, sucesores);
-            }
-            // 4) 2 canibales cruzan en el bote
-            if (boteActual[1] >= 2 && (complemento[1] + 2 <= complemento[0] || complemento[0] == 0)) {
-                transportarYGuardar(0, -2, sucesores);
-            }
-            // 5) 1 misionero y un canibal cruzan en el bote
-            if ((boteActual[0] >= 1 && boteActual[1] >= 1) && (complemento[0] >= complemento[1])) {
-                transportarYGuardar(-1, -1, sucesores);
-            }
-        }
-        // Este
-        if (boteActual[2] == 0) {
-            // 1) 1 misionero cruza en el bote
-            if (complemento[0] >= 1 && boteActual[0] + 1 >= boteActual[1]
-                    && (complemento[0] - 1 >= complemento[1] || complemento[0] == 1)) {
-                transportarYGuardar(1, 0, sucesores);
-            }
-            // 2) 2 misioneros cruzan en el bote
-            if (complemento[0] >= 2 && (complemento[0] - 2 >= complemento[1] || complemento[0] == 2)
-                    && boteActual[0] + 2 <= boteActual[1]) {
-                transportarYGuardar(2, 0, sucesores);
-            }
-            // 3) 1 canibal cruza en el bote
-            if (complemento[1] >= 1 && boteActual[1] + 1 <= boteActual[0] || boteActual[0] == 0) {
-                transportarYGuardar(0, 1, sucesores);
-            }
-            // 4) 2 canibales cruzan en el bote
-            if (complemento[1] >= 2 && (boteActual[1] + 2 <= boteActual[0] || boteActual[0] == 0)) {
-                transportarYGuardar(0, 2, sucesores);
-            }
-            // 5) 1 misionero y un canibal cruzan en el bote
-            if ((complemento[0] >= 1 && complemento[1] >= 1) && (boteActual[0] >= boteActual[1])) {
-                transportarYGuardar(1, 1, sucesores);
-            }
-        }
+        //1 misionero cruza en el bote
+        intercambiarYGuardar(1, 0, sucesores);
+        //2 misioneros cruzan en el bote
+        intercambiarYGuardar(2, 0, sucesores);
+        //1 canibal cruza en el bote
+        intercambiarYGuardar(0, 1, sucesores);
+        //2 canibales cruzan en el bote
+        intercambiarYGuardar(0, 2, sucesores);
+        //1 misionero y un canibal cruzan en el bote
+        intercambiarYGuardar(1, 1, sucesores);
+
         return sucesores;
+        
     }
 
     @Override
     public void mostrarEstado() {
-        System.out.println("(" + boteActual[0] + ", " + boteActual[1] + ", " + boteActual[2] + ")");
+        System.out.println("(" + estadoActual[0] + ", " + estadoActual[1] + ", " + estadoActual[2] + ")");
     }
 
-    public int[] copiarBote(int[] estado) {
-        int[] resultado = new int[3];
-        for (int i = 0; i < 3; i++) {
+    private int[] copiarEstadoActual(int[] estado) {
+        int[] resultado = new int[TAM];
+        for (int i = 0; i < TAM; i++) {
             resultado[i] = estado[i];
         }
         return resultado;
@@ -117,7 +85,7 @@ public class CanibalesYMisioneros implements Estado {
 
     @Override
     public boolean igual(Estado e) {
-        if (Arrays.equals(boteActual, ((CanibalesYMisioneros) e).getBoteActual())) {
+        if (Arrays.equals(estadoActual, ((CanibalesYMisioneros) e).getEstadoActual())) {
             return true;
         }
         return false;
